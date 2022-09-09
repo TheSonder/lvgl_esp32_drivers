@@ -81,7 +81,7 @@ void st7789_init(void)
         {ST7789_GCTRL, {0x07}, 1},
         {0xB6, {0x0A, 0x82, 0x27, 0x00}, 4},
         {ST7789_SLPOUT, {0}, 0x80},
-        {ST7789_DISPON, {0}, 0x80},
+        //{ST7789_DISPON, {0}, 0x80},
         {0, {0}, 0xff},
     };
 
@@ -118,6 +118,19 @@ void st7789_init(void)
     }
 
     st7789_set_orientation(CONFIG_LV_DISPLAY_ORIENTATION);
+    
+    lv_color_t color = lv_color_black();
+    uint16_t size = 240 * 40;
+    lv_color_t *colormap = (lv_color_t*)malloc(sizeof(lv_color_t) * size);
+    for (size_t i = 0; i < size; i++)
+    {
+        /* code */
+        colormap[i] = color;
+    }
+    
+    st7789_flush_color_fill(colormap);
+    free(colormap);
+    st7789_send_cmd(0x29);
 }
 
 /* The ST7789 display controller can drive up to 320*240 displays, when using a 240*240 or 240*135
@@ -189,7 +202,7 @@ void st7789_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * colo
 
 }
 
-void st7789_flush_color_fill(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_map)
+void st7789_flush_color_fill(lv_color_t * color_map)
 {
     uint8_t data[4] = {0};
 
@@ -212,12 +225,10 @@ void st7789_flush_color_fill(lv_disp_drv_t * drv, const lv_area_t * area, lv_col
     /*Memory write*/
     st7789_send_cmd(ST7789_RAMWR);
 
-    size_t size = (size_t)lv_area_get_width(area) * (size_t)lv_area_get_height(area);
-
     for (size_t i = 0; i < 6; i++)
     {
         /* code */
-        st7789_send_data((void*)color_map, size * 2 / 6);
+        st7789_send_data((void*)color_map, 240 * 240 * 2 / 6);
     }
     
 }
