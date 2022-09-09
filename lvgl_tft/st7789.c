@@ -189,6 +189,39 @@ void st7789_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * colo
 
 }
 
+void st7789_flush_color_fill(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_map)
+{
+    uint8_t data[4] = {0};
+
+    /*Column addresses*/
+    st7789_send_cmd(ST7789_CASET);
+    data[0] = (0 >> 8) & 0xFF;
+    data[1] = 0 & 0xFF;
+    data[2] = (239 >> 8) & 0xFF;
+    data[3] = 239 & 0xFF;
+    st7789_send_data(data, 4);
+
+    /*Page addresses*/
+    st7789_send_cmd(ST7789_RASET);
+    data[0] = (0 >> 8) & 0xFF;
+    data[1] = 0 & 0xFF;
+    data[2] = (239 >> 8) & 0xFF;
+    data[3] = 239 & 0xFF;
+    st7789_send_data(data, 4);
+
+    /*Memory write*/
+    st7789_send_cmd(ST7789_RAMWR);
+
+    size_t size = (size_t)lv_area_get_width(area) * (size_t)lv_area_get_height(area);
+
+    for (size_t i = 0; i < 6; i++)
+    {
+        /* code */
+        st7789_send_data((void*)color_map, size * 2 / 6);
+    }
+    
+}
+
 /**********************
  *   STATIC FUNCTIONS
  **********************/
